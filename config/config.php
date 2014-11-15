@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'api_url_base' => "http://7ux.co.uk/vfmu/public/api/",
+    'api_url_base' => $_ENV['vfmu.api_url_base'],
     'api_key' => $_ENV['vfmu.api_key'],
 
     /** DO NOT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING **/
