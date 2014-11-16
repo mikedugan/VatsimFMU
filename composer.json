@@ -1,0 +1,40 @@
+{
+    "name": "vatsim/fmu",
+    "description": "A Laravel Package for interfacing with the VATSIM FMU API.",
+    "keywords": [
+        "vatsim",
+        "feeds",
+        "laravel",
+        "xml",
+        "json",
+        "fmu",
+        "flight management unit",
+        "flight",
+        "management",
+        "vfmu"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anthony Lawrence",
+            "email": "freelancer@anthonylawrence.me.uk"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/A-Lawrence/VatsimFML/issues",
+        "wiki": "https://github.com/A-Lawrence/VatsimFML/wiki"
+    },
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Vatsim\\Xml\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
