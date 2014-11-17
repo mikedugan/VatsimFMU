@@ -2,5 +2,5 @@
 composer.phar
 composer.lock
 .DS_Store
-nbproject/*
-!composer.json
+nbproject
+.idea
