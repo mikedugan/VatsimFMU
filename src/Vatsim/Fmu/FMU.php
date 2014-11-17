@@ -1,7 +1,5 @@
 <?php namespace Vatsim\Fmu;
 
-use Vatsim\Fmu\VatsimFMUException;
-
 class FMU
 {
 
