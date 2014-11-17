@@ -1,19 +1,20 @@
-<?php
+<?php namespace Vatsim\Fmu;
 
-namespace Vatsim\Fmu;
-
-class FMU {
+class FMU
+{
 
     private $_client = "VFMU Client 1.0";
     private $_config = [];
 
-    public function __construct($cfg) {
+    public function __construct($cfg)
+    {
         $this->_config = $cfg;
     }
 
-    public function request($url_id, $data = array()) {
+    public function request($url_id, $data = [])
+    {
         // Determine the method (GET/PATCH/DELETE/POST) etc.
-        if (!strpos($url_id, ":")) {
+        if (! strpos($url_id, ":")) {
             $method = "GET";
             $url_id = $url_id;
         } else {
@@ -22,14 +23,14 @@ class FMU {
         }
 
         // Now find out what the URL *actually* is.
-        if (!array_key_exists($url_id, $this->_config['api_urls'][$method])) {
-            throw new \Exception("Invalid URL specified.", 0);
+        if (! array_key_exists($url_id, $this->_config['api_urls'][$method])) {
+            throw new VatsimFMUException("Invalid URL specified.", 404);
         }
 
         // Build the URL
         $url = $this->_config['api_url_base'];
-        $url.= $this->_config['api_urls'][$method][$url_id];
-        $url.= "?api_key=" . urlencode($this->_config['api_key']);
+        $url .= $this->_config['api_urls'][$method][$url_id];
+        $url .= "?api_key=" . urlencode($this->_config['api_key']);
 
         foreach ($data as $key => $value) {
             if (preg_match("/\{" . $key . "}/i", $url)) {
@@ -42,72 +43,58 @@ class FMU {
         return $this->{strtolower($method) . "Request"}($url, $data);
     }
 
-    private function deleteRequest($url, $data){
+    private function deleteRequest($url, $data)
+    {
         return $this->postRequest($url, $data, "DELETE");
     }
 
-    private function postRequest($url, $data = array(), $customType="POST") {
-        try {
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_URL => $url,
-                CURLOPT_USERAGENT => $this->_client,
-                CURLOPT_TIMEOUT => 3,
-                CURLOPT_CUSTOMREQUEST => strtoupper($customType),
-                CURLOPT_POSTFIELDS => $data,
-            ));
-            // Run and check response.
-            $response = curl_exec($curl);
-            curl_close($curl);
-        } catch (Exception $e) {
-            throw new Exception("Unable to make booking - please contact support.");
-        }
+    private function postRequest($url, $data = [], $customType = "POST")
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL            => $url,
+            CURLOPT_USERAGENT      => $this->_client,
+            CURLOPT_TIMEOUT        => 3,
+            CURLOPT_CUSTOMREQUEST  => strtoupper($customType),
+            CURLOPT_POSTFIELDS     => $data,
+        ]);
 
-        // Decode the response!
-        try {
-            $response = json_decode($response);
-        } catch (Exception $ex) {
-            throw new Exception("Unable to decode the response - please contact support, immediately.");
-        }
-
-        return $response;
+        return $this->executeCurl($curl);
     }
 
-    private function getRequest($url, $data = array()) {
+    private function getRequest($url, $data = [])
+    {
         // Add all the data to the end of the URL.
         foreach ($data as $key => $value) {
-            $url.= "&" . $key . "=" . urlencode($value);
+            $url .= "&" . $key . "=" . urlencode($value);
         }
 
         try {
             $curl = curl_init();
-            curl_setopt_array($curl, array(
+            curl_setopt_array($curl, [
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_URL => $url,
-                CURLOPT_USERAGENT => $this->_client,
-                CURLOPT_TIMEOUT => 3,
-                CURLOPT_CUSTOMREQUEST => "GET",
-            ));
+                CURLOPT_URL            => $url,
+                CURLOPT_USERAGENT      => $this->_client,
+                CURLOPT_TIMEOUT        => 3,
+                CURLOPT_CUSTOMREQUEST  => "GET",
+            ]);
         } catch (\Exception $e) {
-            throw new Exception("Could not create request.", 1);
+            throw new VatsimFMUException("Could not create request.", 400);
         }
 
+        return $this->executeCurl($curl);
+    }
+
+    private function executeCurl($curl)
+    {
         try {
-            // Run and check response.
-            $response = curl_exec($curl);
+            $response = json_decode(curl_exec($curl));
             curl_close($curl);
         } catch (\Exception $e) {
-            throw new \Exception("Could not access remote URL.", 2);
-        }
-
-        try {
-            $response = json_decode($response);
-        } catch (\Exception $e) {
-            throw new \Exception("Returned data could not be decoded.", 3);
+            throw new VatsimFMUException("Could not access remote URL", 404);
         }
 
         return $response;
     }
-
 }
