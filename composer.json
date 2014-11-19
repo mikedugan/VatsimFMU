@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Vatsim\\Xml\\": "src/"
+            "Vatsim\\Fmu\\": "src/"
         }
     },
     "minimum-stability": "stable"
